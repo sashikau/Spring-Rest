@@ -1,0 +1,56 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="com.hsenid.app"/>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:student.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <jaxrs:server name="my-app" address="${student.api.url}">
+        <jaxrs:serviceBeans>
+            <ref bean="studentsResources"/>
+        </jaxrs:serviceBeans>
+        <jaxrs:providers>
+            <ref bean="jacksonProvider"/>
+        </jaxrs:providers>
+    </jaxrs:server>
+
+    <bean id="jacksonProvider" class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider"/>
+
+    <!--<bean class="com.hsenid.app.domain.Response" id="studentsResponese"/>-->
+
+    <bean class="com.hsenid.app.service.StudentService" id="studentService">
+        <property name="studentRepository" ref="studentRepository"/>
+    </bean>
+
+    <bean class="com.hsenid.app.rest.StudentsResources" id="studentsResources">
+        <property name="studentService" ref="studentService"></property>
+    </bean>
+
+    <bean id="studentRepository" class="com.hsenid.app.repository.StudentRepositoryImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/studentDB"/>
+        <property name="username" value="user"/>
+        <property name="password" value="password"/>
+    </bean>
+
+</beans>
